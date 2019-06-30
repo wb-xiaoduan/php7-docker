@@ -21,3 +21,4 @@ RUN cd /usr/local/bin \
 	&& docker-php-ext-enable pdo_mysql
 
 EXPOSE 80 
+WORKDIR /app 
