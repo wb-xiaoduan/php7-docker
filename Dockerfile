@@ -20,5 +20,11 @@ RUN cd /usr/local/bin \
 	./docker-php-ext-install pdo_mysql \
 	&& docker-php-ext-enable pdo_mysql
 
+RUN cd /usr/local/bin \
+	&& curl -sS https://getcomposer.org/installer | php \
+	&& php conposer.phar \
+    && mv composer.phar /usr/local/bin/composer \
+    && chmod 744 composer
+
 EXPOSE 80 
 WORKDIR /app 
