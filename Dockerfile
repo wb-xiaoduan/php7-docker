@@ -22,7 +22,7 @@ RUN cd /usr/local/bin \
 
 RUN cd /usr/local/bin \
 	&& curl -sS https://getcomposer.org/installer | php \
-	&& php conposer.phar \
+	&& php composer.phar \
     && mv composer.phar /usr/local/bin/composer \
     && chmod 744 composer
 
