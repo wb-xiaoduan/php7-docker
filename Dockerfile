@@ -4,12 +4,11 @@ ENV TZ=Asia/Shanghai
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 # install ODBC Driver
-RUN ACCEPT_EULA=Y apt-get install -y msodbcsql
+
 RUN apt-get install -y mssql-tools
-RUN apt-get install -y unixodbc-dev
 RUN echo 'export PATH="$PATH:/opt/mssql-tools/bin"' >> ~/.bash_profile
 RUN echo 'export PATH="$PATH:/opt/mssql-tools/bin"' >> ~/.bashrc
-RUN exec bash
+
 	
 RUN apt-get update && apt-get install -y \
     git \
