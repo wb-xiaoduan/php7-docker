@@ -18,5 +18,28 @@ RUN apt-get update \
         msodbcsql17
 
 RUN docker-php-ext-install mbstring pdo pdo_mysql \
-    && pecl install sqlsrv pdo_sqlsrv xdebug \
-    && docker-php-ext-enable sqlsrv pdo_sqlsrv xdebug
+    && pecl install sqlsrv pdo_sqlsrv \
+    && docker-php-ext-enable sqlsrv pdo_sqlsrv \
+    && docker-php-ext-install -j$(nproc) gd \
+    && docker-php-ext-install zip \
+    && docker-php-ext-install pdo_mysql \
+    && docker-php-ext-install opcache \
+    && docker-php-ext-install mysqli \
+    && rm -r /var/lib/apt/lists/*
+
+
+RUN cd /usr/local/bin \
+	./docker-php-ext-install pdo_mysql \
+	&& docker-php-ext-enable pdo_mysql
+
+RUN cd /usr/local/bin \
+	&& curl -sS https://getcomposer.org/installer | php \
+	&& php composer.phar \
+    && mv composer.phar /usr/local/bin/composer \
+    && chmod 744 composer
+
+ENV TZ=Asia/Shanghai
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
+EXPOSE 80 
+WORKDIR /app 
