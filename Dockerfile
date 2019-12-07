@@ -23,7 +23,7 @@ RUN pecl install sqlsrv-4.1.6.1 \
     
 RUN cd /usr/local/bin \
 	./docker-php-ext-install pdo_mysql \
-	&& docker-php-ext-enable pdo_mysql sqlsrv pdo_sqlsrv \
+	&& docker-php-ext-enable pdo_mysql sqlsrv pdo_sqlsrv 
 
 RUN cd /usr/local/bin \
 	&& curl -sS https://getcomposer.org/installer | php \
