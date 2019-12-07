@@ -1,53 +1,19 @@
-FROM microsoft/mssql-tools as mssql
-FROM php:7.1-apache
+FROM php:7.0-apache-jessie
+MAINTAINER Ayupov Ayaz
 
-COPY --from=mssql /opt/microsoft/ /opt/microsoft/
-COPY --from=mssql /opt/mssql-tools/ /opt/mssql-tools/
-COPY --from=mssql /usr/lib/libmsodbcsql-13.so /usr/lib/libmsodbcsql-13.so
+RUN apt-get update && apt-get install -y apt-transport-https nano &&\
+  curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - &&\
+  curl https://packages.microsoft.com/config/debian/8/prod.list > /etc/apt/sources.list.d/mssql-release.list
 
-RUN set -xe \
-    && apk add --no-cache --virtual .persistent-deps \
-        freetds \
-        unixodbc \
-    && apk add --no-cache --virtual .build-deps \
-        $PHPIZE_DEPS \
-        unixodbc-dev \
-        freetds-dev \
-    && docker-php-source extract \
-    && docker-php-ext-install pdo_dblib \
-    && pecl install \
-        sqlsrv \
-        pdo_sqlsrv \
-    && docker-php-ext-enable --ini-name 30-sqlsrv.ini sqlsrv \
-    && docker-php-ext-enable --ini-name 35-pdo_sqlsrv.ini pdo_sqlsrv \
-    && docker-php-source delete \
-    && apk del .build-deps
+RUN apt-get update && ACCEPT_EULA=Y apt-get install -y msodbcsql17 mssql-tools unixodbc-dev &&\
 
-ENV TZ=Asia/Shanghai
-RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+  pecl install pdo_sqlsrv \
+    && docker-php-ext-enable pdo_sqlsrv \
+    && apt-get autoremove -y && apt-get clean &&\
 
-RUN apt-get update && apt-get install -y \
-    git \
-    libfreetype6-dev \
-    libjpeg62-turbo-dev \
-    libpng-dev \
-&& docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/ \
-&& docker-php-ext-install -j$(nproc) gd \
-    && docker-php-ext-install zip \
-    && docker-php-ext-install pdo_mysql \
-    && docker-php-ext-install opcache \
-    && docker-php-ext-install mysqli \
-    && rm -r /var/lib/apt/lists/*
+  # install necessary locales
+  apt-get install -y locales \
+    && echo "en_US.UTF-8 UTF-8" > /etc/locale.gen \
+    && locale-gen
 
-RUN cd /usr/local/bin \
-	./docker-php-ext-install pdo_mysql \
-	&& docker-php-ext-enable pdo_mysql
-
-RUN cd /usr/local/bin \
-	&& curl -sS https://getcomposer.org/installer | php \
-	&& php composer.phar \
-    && mv composer.phar /usr/local/bin/composer \
-    && chmod 744 composer
-
-EXPOSE 80 
-WORKDIR /app 
+EXPOSE 80
