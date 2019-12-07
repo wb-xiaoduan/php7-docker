@@ -3,14 +3,10 @@ FROM php:7.1-apache
 ENV TZ=Asia/Shanghai
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
-# install ODBC Driver
-
-RUN apt-get install -y mssql-tools
-RUN echo 'export PATH="$PATH:/opt/mssql-tools/bin"' >> ~/.bash_profile
-RUN echo 'export PATH="$PATH:/opt/mssql-tools/bin"' >> ~/.bashrc
-
+ 
 	
 RUN apt-get update && apt-get install -y \
+mssql-tools \
     git \
     libfreetype6-dev \
     libjpeg62-turbo-dev \
@@ -24,7 +20,8 @@ RUN apt-get update && apt-get install -y \
     && docker-php-ext-install mysqli \
     && docker-php-ext-install mbstring \
     && rm -r /var/lib/apt/lists/*
- 
+RUN echo 'export PATH="$PATH:/opt/mssql-tools/bin"' >> ~/.bash_profile
+RUN echo 'export PATH="$PATH:/opt/mssql-tools/bin"' >> ~/.bashrc
 
 RUN pecl install sqlsrv \
     && pecl install pdo_sqlsrv
