@@ -9,8 +9,6 @@ RUN apt-get update && apt-get install -y \
     libjpeg62-turbo-dev \
     libpng-dev \
 && docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/ \
-    && pecl install sqlsrv-4.1.6.1 \
-    && pecl install pdo_sqlsrv-4.1.6.1 \
 && docker-php-ext-install -j$(nproc) gd \
     && docker-php-ext-install zip \
     && docker-php-ext-install pdo_mysql \
@@ -18,7 +16,10 @@ RUN apt-get update && apt-get install -y \
     && docker-php-ext-install mysqli \
     && docker-php-ext-install mbstring \
     && rm -r /var/lib/apt/lists/*
-
+    
+RUN pecl install sqlsrv-4.1.6.1 \
+    && pecl install pdo_sqlsrv-4.1.6.1 
+    
 RUN cd /usr/local/bin \
 	./docker-php-ext-install pdo_mysql \
 	&& docker-php-ext-enable pdo_mysql sqlsrv pdo_sqlsrv \
