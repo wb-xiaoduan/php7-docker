@@ -3,6 +3,11 @@ FROM php:7.1-apache
 ENV TZ=Asia/Shanghai
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
+RUN apt-get update \
+    && curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - \
+    && curl https://packages.microsoft.com/config/debian/9/prod.list \
+        > /etc/apt/sources.list.d/mssql-release.list
+	
 RUN apt-get update && apt-get install -y \
     git \
     libfreetype6-dev \
@@ -17,10 +22,7 @@ RUN apt-get update && apt-get install -y \
     && docker-php-ext-install mysqli \
     && docker-php-ext-install mbstring \
     && rm -r /var/lib/apt/lists/*
-    
-RUN apt-get install unixodbc unixodbc-dev -y \
- && docker-php-ext-configure pdo_odbc --with-pdo-odbc=unixODBC,/usr \
- && docker-php-ext-install pdo_odbc
+ 
 
 RUN pecl install sqlsrv \
     && pecl install pdo_sqlsrv
