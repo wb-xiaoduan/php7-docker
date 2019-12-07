@@ -28,7 +28,7 @@ RUN docker-php-ext-install -j$(nproc) gd \
     && docker-php-ext-install mysqli \
     && docker-php-ext-install mbstring \
     && pecl install sqlsrv pdo_sqlsrv \
-    && docker-php-ext-enable sqlsrv pdo_sqlsrv
+    && docker-php-ext-enable sqlsrv pdo_sqlsrv \
     && rm -r /var/lib/apt/lists/*
     
 RUN cd /usr/local/bin \
