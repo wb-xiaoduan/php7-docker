@@ -5,7 +5,11 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
  
 	
-RUN apt-get update && apt-get install -y \
+RUN apt-get update \
+curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - \
+    && curl https://packages.microsoft.com/config/debian/9/prod.list \
+        > /etc/apt/sources.list.d/mssql-release.list \
+&& apt-get install -y \
 mssql-tools \
     git \
     libfreetype6-dev \
