@@ -18,6 +18,10 @@ RUN apt-get update && apt-get install -y \
     && docker-php-ext-install mbstring \
     && rm -r /var/lib/apt/lists/*
     
+RUN apt-get install unixodbc unixodbc-dev -y \
+ && docker-php-ext-configure pdo_odbc --with-pdo-odbc=unixODBC,/usr \
+ && docker-php-ext-install pdo_odbc
+
 RUN pecl install sqlsrv \
     && pecl install pdo_sqlsrv
     
