@@ -3,13 +3,20 @@ FROM php:7.1-apache
 ENV TZ=Asia/Shanghai
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
+RUN wget https://packages.microsoft.com/ubuntu/17.04/prod/pool/main/m/msodbcsql/msodbcsql_13.1.9.1-1_amd64.deb;
+RUN apt-get -y install unixodbc libcurl3;
+RUN ACCEPT_EULA=Y \
+    dpkg -i msodbcsql_13.1.9.1-1_amd64.deb;
+RUN apt-get install -y locales \
+    && echo "en_US.UTF-8 UTF-8" > /etc/locale.gen\
+    && locale-gen;
+
 RUN apt-get update && apt-get install -y \
     git \
     libfreetype6-dev \
     libjpeg62-turbo-dev \
     libpng-dev \
     unixodbc-dev \
-    msodbcsql17 \
 && docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/ \
 && docker-php-ext-install -j$(nproc) gd \
     && docker-php-ext-install zip \
@@ -19,8 +26,8 @@ RUN apt-get update && apt-get install -y \
     && docker-php-ext-install mbstring \
     && rm -r /var/lib/apt/lists/*
     
-RUN pecl install sqlsrv-4.1.6.1 \
-    && pecl install pdo_sqlsrv-4.1.6.1 
+RUN pecl install sqlsrv \
+    && pecl install pdo_sqlsrv
     
 RUN cd /usr/local/bin \
 	./docker-php-ext-install pdo_mysql \
