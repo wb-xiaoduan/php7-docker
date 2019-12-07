@@ -41,6 +41,10 @@ RUN cd /usr/local/bin \
     && mv composer.phar /usr/local/bin/composer \
     && chmod 744 composer
 
+RUN docker-php-ext-install mbstring pdo pdo_mysql \
+    && pecl install sqlsrv pdo_sqlsrv \
+    && docker-php-ext-enable sqlsrv pdo_sqlsrv
+
 ENV TZ=Asia/Shanghai
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
