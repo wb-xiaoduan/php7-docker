@@ -1,53 +1,24 @@
-FROM php:7.1-apache
+FROM microsoft/mssql-tools as mssql
+FROM php:7.1-cli-alpine
 
-ENV TZ=Asia/Shanghai
-RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+COPY --from=mssql /opt/microsoft/ /opt/microsoft/
+COPY --from=mssql /opt/mssql-tools/ /opt/mssql-tools/
+COPY --from=mssql /usr/lib/libmsodbcsql-13.so /usr/lib/libmsodbcsql-13.so
 
-ENV ACCEPT_EULA=Y
-
-# Microsoft SQL Server Prerequisites
-
-
-
-RUN apt-get update \
-&& curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - \
-&& curl https://packages.microsoft.com/config/debian/9/prod.list \> /etc/apt/sources.list.d/mssql-release.list \
-&& apt-get install -y --no-install-recommends \locales \apt-transport-https \
-&& echo"en_US.UTF-8 UTF-8"> /etc/locale.gen \
-&& locale-gen \
-&& apt-get update \
-&& apt-get -y --no-install-recommends install \unixodbc-dev \msodbcsql17 
-	
-RUN apt-get update && apt-get install -y \
-mssql-tools \
-    git \
-    libfreetype6-dev \
-    libjpeg62-turbo-dev \
-    libpng-dev \
-    unixodbc-dev \
-&& docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/ \
-&& docker-php-ext-install -j$(nproc) gd \
-    && docker-php-ext-install zip \
-    && docker-php-ext-install pdo_mysql \
-    && docker-php-ext-install opcache \
-    && docker-php-ext-install mysqli \
-    && docker-php-ext-install mbstring \
-    && rm -r /var/lib/apt/lists/*
-RUN echo 'export PATH="$PATH:/opt/mssql-tools/bin"' >> ~/.bash_profile
-RUN echo 'export PATH="$PATH:/opt/mssql-tools/bin"' >> ~/.bashrc
-
-RUN pecl install sqlsrv \
-    && pecl install pdo_sqlsrv
-    
-RUN cd /usr/local/bin \
-	./docker-php-ext-install pdo_mysql \
-	&& docker-php-ext-enable pdo_mysql sqlsrv pdo_sqlsrv 
-
-RUN cd /usr/local/bin \
-	&& curl -sS https://getcomposer.org/installer | php \
-	&& php composer.phar \
-    && mv composer.phar /usr/local/bin/composer \
-    && chmod 744 composer
-
-EXPOSE 80 
-WORKDIR /app 
+RUN set -xe \
+    && apk add --no-cache --virtual .persistent-deps \
+        freetds \
+        unixodbc \
+    && apk add --no-cache --virtual .build-deps \
+        $PHPIZE_DEPS \
+        unixodbc-dev \
+        freetds-dev \
+    && docker-php-source extract \
+    && docker-php-ext-install pdo_dblib \
+    && pecl install \
+        sqlsrv \
+        pdo_sqlsrv \
+    && docker-php-ext-enable --ini-name 30-sqlsrv.ini sqlsrv \
+    && docker-php-ext-enable --ini-name 35-pdo_sqlsrv.ini pdo_sqlsrv \
+    && docker-php-source delete \
+    && apk del .build-deps
