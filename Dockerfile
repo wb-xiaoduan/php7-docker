@@ -21,16 +21,15 @@ RUN apt-get update && apt-get install -y \
     && apt-get -y --no-install-recommends install \
         unixodbc-dev \
         msodbcsql17
-&& docker-php-ext-install -j$(nproc) gd \
+RUN docker-php-ext-install -j$(nproc) gd \
     && docker-php-ext-install zip \
     && docker-php-ext-install pdo_mysql \
     && docker-php-ext-install opcache \
     && docker-php-ext-install mysqli \
     && rm -r /var/lib/apt/lists/*
-    
-RUN docker-php-ext-install mbstring pdo pdo_mysql \
-    && pecl install sqlsrv pdo_sqlsrv xdebug \
-    && docker-php-ext-enable sqlsrv pdo_sqlsrv xdebug
+    && docker-php-ext-install mbstring pdo  \
+    && pecl install sqlsrv pdo_sqlsrv \
+    && docker-php-ext-enable sqlsrv pdo_sqlsrv
     
 RUN cd /usr/local/bin \
 	./docker-php-ext-install pdo_mysql \
