@@ -47,6 +47,6 @@ RUN docker-php-ext-install mbstring pdo pdo_mysql \
 
 ENV TZ=Asia/Shanghai
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
-
+RUN sed -i 's/TLSv1.2/TLSv1.0/g' /etc/ssl/openssl.cnf
 EXPOSE 80 
 WORKDIR /app 
